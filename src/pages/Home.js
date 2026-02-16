@@ -1,9 +1,15 @@
-// src/pages/Home.js
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const API_BASE = 'http://127.0.0.1:5000';
+
+// Single formatDate function (no duplicate)
+function formatDate(dateStr) {
+  if (!dateStr) return 'TBD';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 export default function Home() {
   const [events, setEvents] = useState([]);
@@ -11,6 +17,7 @@ export default function Home() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+  const { isAuthenticated, isAdmin, user, logout } = useAuth();
 
   useEffect(() => {
     fetch(`${API_BASE}/api/events`)
@@ -19,7 +26,6 @@ export default function Home() {
         return res.json();
       })
       .then(data => {
-        // Sort by date descending (newest first)
         const sorted = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
         setEvents(sorted);
         setLoading(false);
@@ -48,12 +54,13 @@ export default function Home() {
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
-      {/* Header row with title left + button right */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '40px'
+        marginBottom: '40px',
+        flexWrap: 'wrap',
+        gap: '16px'
       }}>
         <h1 style={{
           fontSize: '2.4rem',
@@ -64,29 +71,67 @@ export default function Home() {
           Upcoming Events
         </h1>
 
-        <button
-          onClick={() => navigate('/add')}
-          style={{
-            backgroundColor: '#0288d1',
-            color: 'white',
-            border: 'none',
-            padding: '10px 24px',
-            fontSize: '1.05rem',
-            fontWeight: '500',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.12)'
-          }}
-        >
-          <span style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>+</span>
-          Add Event
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {isAdmin && (
+            <button
+              onClick={() => navigate('/add')}
+              style={{
+                backgroundColor: '#1976d2',
+                color: 'white',
+                border: 'none',
+                padding: '10px 24px',
+                fontSize: '1.05rem',
+                fontWeight: '500',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.12)'
+              }}
+            >
+              <span style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>+</span>
+              Add Event
+            </button>
+          )}
+
+          {isAuthenticated ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <span style={{ color: '#444', fontWeight: '500' }}>
+                Hi, {user?.name || 'User'}
+              </span>
+              <button
+                onClick={logout}
+                style={{
+                  backgroundColor: '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate('/login')}
+              style={{
+                backgroundColor: '#1976d2',
+                color: 'white',
+                border: 'none',
+                padding: '10px 24px',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Login
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Cards – starting from left */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {events.length === 0 ? (
           <div style={{
@@ -94,7 +139,8 @@ export default function Home() {
             padding: '80px',
             background: '#fff',
             borderRadius: '10px',
-            color: '#666'
+            color: '#666',
+            border: '1px dashed #ccc'
           }}>
             No upcoming events found
           </div>
@@ -139,7 +185,7 @@ export default function Home() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '1.5rem', color: '#0288d1' }}>📅</span>
-                  <span>{event.date}</span>
+                  <span>{formatDate(event.date)}</span>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -166,7 +212,7 @@ export default function Home() {
                 fontWeight: '500',
                 fontSize: '1.05rem'
               }}>
-                Click to view details
+                Click to view details →
               </div>
             </div>
           ))

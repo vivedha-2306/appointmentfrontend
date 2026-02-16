@@ -1,11 +1,13 @@
 // src/pages/AddEvent.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const API_BASE = 'http://127.0.0.1:5000';
 
 export default function AddEvent() {
   const navigate = useNavigate();
+  const { token, logout } = useAuth();
 
   const [form, setForm] = useState({
     title: '',
@@ -21,20 +23,38 @@ export default function AddEvent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!token) {
+      alert('Please login as admin first');
+      navigate('/login');
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/api/events`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(form)
       });
+
+      if (res.status === 401 || res.status === 403) {
+        alert('Session expired or not authorized. Please login again.');
+        logout();
+        navigate('/login');
+        return;
+      }
 
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.message || 'Failed to create event');
       }
 
+      // No need to assign to variable if not used
       alert('Event created successfully!');
-      navigate('/'); // immediately back to home page
+      navigate('/');
     } catch (err) {
       alert('Error: ' + err.message);
     }
@@ -64,7 +84,6 @@ export default function AddEvent() {
             }}
           />
         </div>
-
         <div>
           <textarea
             name="description"
@@ -83,7 +102,6 @@ export default function AddEvent() {
             }}
           />
         </div>
-
         <div>
           <input
             name="date"
@@ -101,7 +119,6 @@ export default function AddEvent() {
             }}
           />
         </div>
-
         <div>
           <input
             name="location"
@@ -119,7 +136,6 @@ export default function AddEvent() {
             }}
           />
         </div>
-
         <div>
           <input
             name="contactInfo"
