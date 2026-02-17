@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = 'https://appointmentbackend-vebl.onrender.com';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
