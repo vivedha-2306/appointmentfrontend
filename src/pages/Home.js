@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = 'https://appointmentbackend-vebl.onrender.com';
 
 // Single formatDate function (no duplicate)
 function formatDate(dateStr) {
