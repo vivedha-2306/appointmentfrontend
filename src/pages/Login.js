@@ -25,7 +25,9 @@ export default function Login() {
         body: JSON.stringify(form),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+console.log(text);
+
 
       if (!res.ok) throw new Error(data.message || 'Login failed');
 
