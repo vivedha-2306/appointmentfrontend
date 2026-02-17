@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import RegistrationForm from './RegistrationForm';
 
-const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = 'https://appointmentbackend-vebl.onrender.com';
 
 function formatDate(dateStr) {
   if (!dateStr) return 'TBD';
